@@ -1,15 +1,14 @@
 @echo off
-title Uninstalling EA Anti-Cheat...
-echo Uninstalling EA Anti-Cheat...
+title EA Anti-Cheat Removal
+set "installer=C:\Program Files\EA\AC\EAAntiCheat.Installer.exe"
 
-:: Check if EA Anti-Cheat exists
-if exist "C:\Program Files\EA\AC\EAAntiCheat.Installer.exe" (
-    echo Found EA Anti-Cheat. Uninstalling...
-    "C:\Program Files\EA\AC\EAAntiCheat.Installer.exe" uninstall
-    echo EA Anti-Cheat has been removed.
-) else (
-    echo EA Anti-Cheat not found. Exiting...
+if not exist "%installer%" (
+    echo EA Anti-Cheat was not found on this system.
+    pause & exit
 )
 
+echo Removing EA Anti-Cheat...
+"%installer%" uninstall
+echo Done. You may now close this window.
 pause
 exit
