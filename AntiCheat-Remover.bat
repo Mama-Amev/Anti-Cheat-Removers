@@ -19,18 +19,22 @@ echo  [2] EasyAntiCheat (EAC)
 echo  [3] nProtect GameGuard
 echo  [4] AntiCheatExpert (ACE)
 echo  [5] BattlEye
-echo  [6] Exit
+echo  [6] FACEIT Anti-Cheat
+echo  [7] BlackCipher (Nexon)
+echo  [8] Exit
 echo.
-set /p "choice=Select an option (1-6): "
+set /p "choice=Select an option (1-8): "
 
 if "%choice%"=="1" goto ea_anticheat
 if "%choice%"=="2" goto eac
 if "%choice%"=="3" goto nprotect
 if "%choice%"=="4" goto ace
 if "%choice%"=="5" goto battleye
-if "%choice%"=="6" exit
+if "%choice%"=="6" goto faceit
+if "%choice%"=="7" goto blackcipher
+if "%choice%"=="8" exit
 
-echo Invalid selection. Please enter a number between 1 and 6.
+echo Invalid selection. Please enter a number between 1 and 8.
 timeout /t 2 >nul
 goto menu
 
@@ -302,5 +306,172 @@ if "%BE_FOUND%"=="1" (
     echo BattlEye has been removed. A reboot is recommended.
 ) else (
     echo No BattlEye installation was found. Nothing to remove.
+)
+pause & goto menu
+
+
+:: ============================================================
+:faceit
+cls
+title FACEIT Anti-Cheat Removal
+set "FC_FOUND=0"
+
+echo Checking for FACEIT Anti-Cheat...
+
+for %%S in (FACEIT FACEITService faceit_ac) do (
+    sc query "%%S" >nul 2>&1
+    if !errorLevel! equ 0 (
+        set "FC_FOUND=1"
+        echo [FOUND] Service: %%S
+        sc stop "%%S" >nul 2>&1
+        sc delete "%%S" >nul 2>&1
+        echo [DONE] Service stopped and removed.
+    )
+)
+
+for %%P in (faceit.exe faceit_ac.exe FACEITService.exe) do (
+    tasklist /fi "imagename eq %%P" 2>nul | find /i "%%P" >nul
+    if !errorLevel! equ 0 (
+        taskkill /f /im "%%P" >nul 2>&1
+        echo [DONE] Killed process: %%P
+    )
+)
+
+for %%U in (
+    "C:\Program Files\FACEIT AC\unins000.exe"
+    "C:\Program Files\FACEIT AC Service\unins000.exe"
+) do (
+    if exist %%U (
+        set "FC_FOUND=1"
+        echo [FOUND] Official uninstaller at %%U
+        start /wait %%U /SILENT
+        echo [DONE] Uninstaller finished.
+    )
+)
+
+for %%D in (faceit.sys faceit_ac.sys) do (
+    if exist "%SystemRoot%\System32\drivers\%%D" (
+        set "FC_FOUND=1"
+        del /f /q "%SystemRoot%\System32\drivers\%%D" >nul 2>&1
+        echo [DONE] Deleted driver: %%D
+    )
+)
+
+for %%P in (
+    "C:\Program Files\FACEIT AC"
+    "C:\Program Files\FACEIT AC Service"
+) do (
+    if exist %%P (
+        set "FC_FOUND=1"
+        rd /s /q %%P >nul 2>&1
+        echo [DONE] Removed %%P
+    )
+)
+
+for %%K in (
+    "HKLM\SYSTEM\CurrentControlSet\Services\FACEIT"
+    "HKLM\SYSTEM\CurrentControlSet\Services\FACEITService"
+    "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{1419E44C-0EF4-4822-9194-9F1A4D43973D}_is1"
+    "HKLM\SOFTWARE\FACEIT"
+    "HKLM\SOFTWARE\WOW6432Node\FACEIT"
+) do (
+    reg query %%K >nul 2>&1
+    if !errorLevel! equ 0 (
+        set "FC_FOUND=1"
+        reg delete %%K /f >nul 2>&1
+        echo [DONE] Deleted registry key: %%K
+    )
+)
+
+echo.
+if "%FC_FOUND%"=="1" (
+    echo FACEIT Anti-Cheat has been removed. A reboot is recommended.
+) else (
+    echo No FACEIT Anti-Cheat installation was found. Nothing to remove.
+)
+pause & goto menu
+
+
+:: ============================================================
+:blackcipher
+cls
+title BlackCipher (Nexon) Removal
+set "BC_FOUND=0"
+
+echo Checking for BlackCipher / Nexon Game Security...
+
+for %%S in (NGS NexonGameSecurity BlackCipher) do (
+    sc query "%%S" >nul 2>&1
+    if !errorLevel! equ 0 (
+        set "BC_FOUND=1"
+        echo [FOUND] Service: %%S
+        sc stop "%%S" >nul 2>&1
+        sc delete "%%S" >nul 2>&1
+        echo [DONE] Service stopped and removed.
+    )
+)
+
+for %%P in (NGService.exe NGM64.exe NMService.exe BlackCipher.exe) do (
+    tasklist /fi "imagename eq %%P" 2>nul | find /i "%%P" >nul
+    if !errorLevel! equ 0 (
+        taskkill /f /im "%%P" >nul 2>&1
+        echo [DONE] Killed process: %%P
+    )
+)
+
+for %%U in (
+    "C:\ProgramData\Nexon\NGS\NGService.exe"
+    "C:\Program Files (x86)\Common Files\BlackCipher\NGService.exe"
+    "C:\Program Files (x86)\Nexon\NGService.exe"
+) do (
+    if exist %%U (
+        set "BC_FOUND=1"
+        echo [FOUND] Official uninstaller at %%U
+        start /wait %%U --uninstall
+        echo [DONE] Uninstaller finished.
+    )
+)
+
+for %%D in (BlackCipher.sys NGS.sys) do (
+    if exist "%SystemRoot%\System32\drivers\%%D" (
+        set "BC_FOUND=1"
+        del /f /q "%SystemRoot%\System32\drivers\%%D" >nul 2>&1
+        echo [DONE] Deleted driver: %%D
+    )
+)
+
+for %%P in (
+    "C:\ProgramData\Nexon"
+    "C:\Program Files (x86)\Common Files\BlackCipher"
+    "C:\Program Files (x86)\Common Files\Nexon"
+    "C:\Program Files (x86)\Nexon"
+) do (
+    if exist %%P (
+        set "BC_FOUND=1"
+        rd /s /q %%P >nul 2>&1
+        echo [DONE] Removed %%P
+    )
+)
+
+for %%K in (
+    "HKLM\SYSTEM\CurrentControlSet\Services\NGS"
+    "HKLM\SYSTEM\CurrentControlSet\Services\NexonGameSecurity"
+    "HKLM\SOFTWARE\Nexon"
+    "HKLM\SOFTWARE\WOW6432Node\Nexon"
+    "HKCU\SOFTWARE\Nexon"
+) do (
+    reg query %%K >nul 2>&1
+    if !errorLevel! equ 0 (
+        set "BC_FOUND=1"
+        reg delete %%K /f >nul 2>&1
+        echo [DONE] Deleted registry key: %%K
+    )
+)
+
+echo.
+if "%BC_FOUND%"=="1" (
+    echo BlackCipher / Nexon Game Security has been removed. A reboot is recommended.
+) else (
+    echo No BlackCipher installation was found. Nothing to remove.
 )
 pause & goto menu
